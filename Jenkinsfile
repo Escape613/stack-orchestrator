@@ -16,8 +16,11 @@ pipeline {
                     //including withRegistry block for now... currently not authenticating or pushing to git.vdb.to
                     docker.withRegistry('https://git.vdb.to'){
                         echo 'Building foundation base node 16 image...'
-                        def foundation_image = docker.build("cerc-io/cerc-builder-js:jenkinscicd", "--build-arg VARIANT=16 app/data/container-build/cerc-builder-js")
-                        echo 'built foundation image'
+                        sh 'echo $GITEA_JENKINS_PUBLISH | docker login https://git.vdb.to -u cerccicd --password-stdin '
+                        def foundation_image = docker.build("git.vdb.to/cerc-io/cerc-builder-js:jenkinscicd", "--build-arg VARIANT=16 app/data/container-build/cerc-builder-js")
+                        foundation_image.push()
+                        foundation_image.push("latest")
+                        echo 'built and published foundation image for node 16'
                     }
                 }
             }
